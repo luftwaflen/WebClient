@@ -1,0 +1,42 @@
+﻿@using Blazored.Modal
+@using Blazored.Modal.Services
+@using WebClient.Models
+<div>
+    <EditForm Model="_form" OnValidSubmit="SubmitForm">
+        <div>
+            <label for="message">Систола</label>
+            <InputText @bind-Value="_form.PressureSYS"/>
+        </div>
+        
+        <div>
+            <label for="message">Диастола</label>
+            <InputText @bind-Value="_form.PressureDIA"/>
+        </div>
+        
+        <div>
+            <label for="message">Пульс</label>
+            <InputText @bind-Value="_form.Pulse"/>
+        </div>
+        
+        <div>
+            <label for="message">Описание</label>
+            <InputTextArea @bind-Value="_form.Description"/>
+        </div>
+        
+        <div>
+            <button type="submit">Создать</button>
+            <button @onclick="Cancel">Отмена</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private readonly DiaryNote _form = new();
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    protected override void OnInitialized() => BlazoredModal.SetTitle("Давление");
+
+    private async Task SubmitForm() => await BlazoredModal.CloseAsync(ModalResult.Ok(_form.PressureSYS));
+    private async Task Cancel() => await BlazoredModal.CancelAsync();
+}

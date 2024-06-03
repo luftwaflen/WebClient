@@ -1,0 +1,66 @@
+﻿@page "/login"
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebClient.Requests
+@using WebClient.Responses
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject HttpClient Http;
+
+
+<div>
+    <EditForm FormName="loginForm" Model="@LoginRequest" OnValidSubmit="@LoginUser">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div>
+            <label for="login">Логин</label>
+            <InputText id="login" @bind-Value="@LoginRequest.Login" />
+            <ValidationMessage For="@(() => LoginRequest.Login)" />
+        </div>
+
+        <div>
+            <label for="password">Пароль</label>
+            <InputText id="password" type="password" @bind-Value="@LoginRequest.Password" />
+            <ValidationMessage For="@(() => LoginRequest.Password)" />
+        </div>
+        <div>
+            <button FormName="loginForm" type="submit">Вход</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [SupplyParameterFromForm] public LoginRequest? LoginRequest { get; set; }
+
+    public AuthenticationState User { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoginRequest ??= new LoginRequest();
+    }
+
+    private async void LoginUser()
+    {
+        var response = await Http.PostAsJsonAsync("https://localhost:7270/Api/User/Login", LoginRequest);
+        if (response.IsSuccessStatusCode)
+        {
+            var token = await response.Content.ReadFromJsonAsync<TokenResponse>();
+            await localStorage.SetItemAsync("jwt-token", token.Token);
+            User = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+            // var tokenHandler = new JwtSecurityTokenHandler();
+            // var jwtToken = tokenHandler.ReadJwtToken(token.Token);
+
+            // var identity = new ClaimsIdentity(jwtToken.Claims, "jwt");
+            // var user = new ClaimsPrincipal(identity);
+
+            Navigation.NavigateTo(Navigation.Uri, true);
+        }
+        else
+        {
+            // Обработка ошибки
+            Console.WriteLine("Login failed");
+        }
+    }
+
+}

@@ -1,0 +1,29 @@
+﻿@page "/patient-main"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+<h3>PatientMain</h3>
+
+<AuthorizeView>
+    <Authorized>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            // User is authenticated
+        }
+        else
+        {
+            // User is not authenticated, redirect to login page
+            NavigationManager.NavigateTo("login");
+        }
+    }
+}

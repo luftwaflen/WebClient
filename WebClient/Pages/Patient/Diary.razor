@@ -1,0 +1,92 @@
+﻿@page "/diary"
+@using System.Security.Claims
+@using Blazored.Modal.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebClient.Models
+@using WebClient.Pages.Admin
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+<h3>Diary</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <button @onclick="ShowModal">Создать запись</button>
+        <div>
+            @if (DiaryNotes == null)
+            {
+                <p><em>Загрузка...</em></p>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Систола</th>
+                        <th>Диастола</th>
+                        <th>Пульс</th>
+                        <th>Описание</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var diaryNote in DiaryNotes)
+                    {
+                        <tr>
+                            <td>@diaryNote.Date</td>
+                            <td>@diaryNote.PressureSYS</td>
+                            <td>@diaryNote.PressureDIA</td>
+                            <td>@diaryNote.Pulse</td>
+                            <td>@diaryNote.Description</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+    public List<DiaryNote> DiaryNotes { get; set; }
+    public DiaryNote NewDiaryNote { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var id = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+
+        DiaryNotes = await GetDiary(id);
+
+        if (user.Identity.IsAuthenticated)
+        {
+            // User is authenticated
+        }
+        else
+        {
+            // User is not authenticated, redirect to login page
+            NavigationManager.NavigateTo("login");
+        }
+    }
+
+    public async Task<List<DiaryNote>> GetDiary(string id)
+    {
+        var response = await Http.GetAsync($"https://localhost:7270/Api/Patient/GetDiary?patientId={id}");
+        var data = await response.Content.ReadFromJsonAsync<List<DiaryNote>>();
+
+        return data;
+    }
+
+    private async Task ShowModal()
+    {
+        var messageForm = Modal.Show<CreateDiaryModal>("Создать запись");
+        var result = await messageForm.Result;
+
+        if (result.Confirmed)
+        {
+            var message = result.Data.ToString();
+        }
+    }
+}

@@ -1,0 +1,28 @@
+﻿@using Blazored.Modal
+@using Blazored.Modal.Services
+@using WebClient.Models
+
+<div>
+    <EditForm Model="_form" OnValidSubmit="SubmitForm">
+        <div>
+            <label for="name">Название семейной группы</label>
+            <InputText @bind-Value="_form.Name" />
+        </div>
+
+        <div>
+            <button type="submit">Создать</button>
+            <button @onclick="Cancel">Отмена</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private readonly WebClient.Models.Family _form = new();
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    protected override void OnInitialized() => BlazoredModal.SetTitle("Семейная группа");
+
+    private async Task SubmitForm() => await BlazoredModal.CloseAsync(ModalResult.Ok());
+    private async Task Cancel() => await BlazoredModal.CancelAsync();
+}

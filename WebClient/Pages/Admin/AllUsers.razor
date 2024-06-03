@@ -1,0 +1,66 @@
+﻿@page "/users"
+@using System.Net
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebClient.Models
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+<h3>Пользователи</h3>
+
+<AuthorizeView>
+    <Authorized>
+        @if (Users == null)
+        {
+            <p><em>Загрузка...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Логин</th>
+                    <th>Роль</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var user in Users)
+                {
+                    <tr>
+                        <td>@user.Login</td>
+                        <td>@user.Role.ToString()</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    public List<User> Users { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            Users = await GetUsers();
+        }
+        else
+        {
+            // User is not authenticated, redirect to login page
+            NavigationManager.NavigateTo("login");
+        }
+
+        
+    }
+    public async Task<List<User>> GetUsers()
+    {
+        var response = await Http.GetAsync("https://localhost:7270/Api/Admin/GetAllUsers");
+        var data = await response.Content.ReadFromJsonAsync<List<User>>();
+
+        return data;
+    }
+}

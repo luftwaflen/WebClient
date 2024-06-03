@@ -1,0 +1,89 @@
+﻿@page "/register-admin"
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebClient.Requests
+@using WebClient.Responses
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+
+<div>
+    <h3>Регистрация администратора</h3>
+    <EditForm FormName="adminRegForm" Model="@AdminRegistration" OnValidSubmit="@RegisterAdminMethod">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <div>
+            <label for="login1">Логин</label>
+            <InputText id="login1" @bind-Value="@AdminRegistration.Login"/>
+            <ValidationMessage For="@(() => AdminRegistration.Login)"/>
+        </div>
+
+        <div>
+            <label for="password1">Пароль</label>
+            <InputText id="password1" type="password" @bind-Value="@AdminRegistration.Password"/>
+            <ValidationMessage For="@(() => AdminRegistration.Password)"/>
+        </div>
+        <div>
+            <button FormName="adminRegForm" type="submit">Регистрация</button>
+        </div>
+    </EditForm>
+</div>
+
+@* <AuthorizeView>
+    <Authorized>
+        <div>
+            <h3>Admin</h3>
+            <EditForm FormName="adminRegForm" Model="@AdminRegistration" OnValidSubmit="@RegisterAdminMethod">
+                <DataAnnotationsValidator/>
+                <ValidationSummary/>
+                <div>
+                    <label for="login1">Логин</label>
+                    <InputText id="login1" @bind-Value="@AdminRegistration.Login"/>
+                    <ValidationMessage For="@(() => AdminRegistration.Login)"/>
+                </div>
+
+                <div>
+                    <label for="password1">Пароль</label>
+                    <InputText id="password1" type="password" @bind-Value="@AdminRegistration.Password"/>
+                    <ValidationMessage For="@(() => AdminRegistration.Password)"/>
+                </div>
+                <div>
+                    <button FormName="adminRegForm" type="submit">Регистрация</button>
+                </div>
+            </EditForm>
+        </div>
+    </Authorized>
+</AuthorizeView> *@
+
+@code {
+    [SupplyParameterFromForm]
+    public AdminRegistration? AdminRegistration { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AdminRegistration ??= new AdminRegistration();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            
+        }
+        else
+        {
+            // User is not authenticated, redirect to login page
+            NavigationManager.NavigateTo("login");
+        }
+    }
+
+    private async Task RegisterAdminMethod()
+    {
+        var response = await Http.PostAsJsonAsync("https://localhost:7270/Api/Admin/RegisterAdmin", AdminRegistration);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/users");
+        }
+        else
+        {
+        }
+    }
+}

@@ -1,0 +1,113 @@
+﻿@page "/register-doctor"
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebClient.Requests
+@using WebClient.Responses
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+
+<div>
+    <h3>Регистрация врача</h3>
+    <EditForm FormName="doctorRegForm" Model="@DoctorRegistration" OnValidSubmit="@RegisterDoctorMethod">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div>
+            <label for="login1">Логин</label>
+            <InputText id="login1" @bind-Value="@DoctorRegistration.Login" />
+            <ValidationMessage For="@(() => DoctorRegistration.Login)" />
+        </div>
+                
+        <div>
+            <label for="firstName1">Имя</label>
+            <InputText id="firstName1" @bind-Value="@DoctorRegistration.FirstName" />
+            <ValidationMessage For="@(() => DoctorRegistration.FirstName)" />
+        </div>
+        
+        <div>
+            <label for="secondName1">Фамилия</label>
+            <InputText id="secondName1" @bind-Value="@DoctorRegistration.SecondName" />
+            <ValidationMessage For="@(() => DoctorRegistration.SecondName)" />
+        </div>
+
+        <div>
+            <label for="password1">Пароль</label>
+            <InputText id="password1" type="password" @bind-Value="@DoctorRegistration.Password" />
+            <ValidationMessage For="@(() => DoctorRegistration.Password)" />
+        </div>
+        <div>
+            <button FormName="doctorRegForm" type="submit">Регистрация</button>
+        </div>
+    </EditForm>
+</div>
+
+@* <AuthorizeView>
+    <Authorized>
+        <div>
+            <h3>Admin</h3>
+            <EditForm FormName="doctorRegForm" Model="@DoctorRegistration" OnValidSubmit="@RegisterDoctorMethod">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div>
+                    <label for="login1">Логин</label>
+                    <InputText id="login1" @bind-Value="@DoctorRegistration.Login" />
+                    <ValidationMessage For="@(() => DoctorRegistration.Login)" />
+                </div>
+                
+                <div>
+                    <label for="firstName1">Имя</label>
+                    <InputText id="firstName1" @bind-Value="@DoctorRegistration.FirstName" />
+                    <ValidationMessage For="@(() => DoctorRegistration.FirstName)" />
+                </div>
+        
+                <div>
+                    <label for="secondName1">Фамилия</label>
+                    <InputText id="secondName1" @bind-Value="@DoctorRegistration.SecondName" />
+                    <ValidationMessage For="@(() => DoctorRegistration.SecondName)" />
+                </div>
+
+                <div>
+                    <label for="password1">Пароль</label>
+                    <InputText id="password1" type="password" @bind-Value="@DoctorRegistration.Password" />
+                    <ValidationMessage For="@(() => DoctorRegistration.Password)" />
+                </div>
+                <div>
+                    <button FormName="doctorRegForm" type="submit">Регистрация</button>
+                </div>
+            </EditForm>
+        </div>
+    </Authorized>
+</AuthorizeView> *@
+
+@code {
+    [SupplyParameterFromForm]
+    public DoctorRegistration? DoctorRegistration { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        DoctorRegistration ??= new DoctorRegistration();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            
+        }
+        else
+        {
+            // User is not authenticated, redirect to login page
+            NavigationManager.NavigateTo("login");
+        }
+    }
+
+    private async Task RegisterDoctorMethod()
+    {
+        var response = await Http.PostAsJsonAsync("https://localhost:7270/Api/Admin/RegisterDoctor", DoctorRegistration);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/doctors");
+        }
+        else
+        {
+        }
+    }
+}

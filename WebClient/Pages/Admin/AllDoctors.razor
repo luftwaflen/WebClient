@@ -1,0 +1,68 @@
+﻿@page "/doctors"
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebClient.Models
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+<h3>Врачи</h3>
+
+<AuthorizeView>
+    <Authorized>
+        @if (Doctors == null)
+        {
+            <p><em>Загрузка...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Логин</th>
+                        <th>Роль</th>
+                        <th>Имя</th>
+                        <th>Фамилия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doctor in Doctors)
+                    {
+                        <tr>
+                            <td>@doctor.User.Login</td>
+                            <td>@doctor.User.Role</td>
+                            <td>@doctor.FirstName</td>
+                            <td>@doctor.SecondName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    public List<Doctor> Doctors { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            Doctors = await GetDoctors();
+        }
+        else
+        {
+            // User is not authenticated, redirect to login page
+            NavigationManager.NavigateTo("login");
+        }
+    }
+
+    public async Task<List<Doctor>> GetDoctors()
+    {
+        var response = await Http.GetAsync("https://localhost:7270/Api/Admin/GetAllDoctors");
+        var data = await response.Content.ReadFromJsonAsync<List<Doctor>>();
+
+        return data;
+    }
+}

@@ -1,0 +1,35 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Welcome, @context.User.Identity.Name!</h1>
+        <p>You can see this content because you are logged in.</p>
+    </Authorized>
+    <NotAuthorized>
+        <h1>Welcome, anonymous!</h1>
+        <p>You can't see this content because you are not logged in.</p>
+        <p><a href="login">Log in</a></p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            // User is authenticated
+        }
+        else
+        {
+            // User is not authenticated, redirect to login page
+            NavigationManager.NavigateTo("login");
+        }
+    }
+}

@@ -1,0 +1,56 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <AuthorizeView>
+            <Authorized>
+                <div class="sidebar">
+                    @if (@context.User.IsInRole("Admin"))
+                    {
+                        <AdminNavMenu />
+                    }
+                    @if (@context.User.IsInRole("Doctor"))
+                    {
+                        <DoctorNavMenu />
+                    }
+                    @if (@context.User.IsInRole("Patient"))
+                    {
+                        <PatientNavMenu />
+                    }
+                    @* <NavMenu/> *@
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+
+    <main>
+        <AuthorizeView>
+            <Authorized>
+                @if (@context.User.IsInRole("Admin") || @context.User.IsInRole("Doctor") || @context.User.IsInRole("Patient"))
+                {
+                    <div class="top-row px-4">
+                        <a href="" @onclick="@Logout">Logout</a>
+                    </div>
+                }
+            </Authorized>
+        </AuthorizeView>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    private async Task Logout()
+    {
+        await localStorage.ClearAsync();
+        await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).GetAuthenticationStateAsync();
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+        //NavigationManager.NavigateTo("/login");
+    }
+}
