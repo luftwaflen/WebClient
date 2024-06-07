@@ -1,0 +1,75 @@
+﻿@page "/chat"
+@using System.Web
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebClient.Requests
+@using WebClient.Responses
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+
+<AuthorizeView>
+    <Authorized>
+        @if (Messages == null)
+        {
+
+        }
+        else
+        {
+            <div class="chat-container border p-3 rounded">
+                <div class="messages-container mb-3" style="max-height: 300px; overflow-y: auto;">
+                    @foreach (var message in Messages)
+                    {
+                        <div class="message mb-2">
+                            <strong>@message.Sender:</strong> @message.Sender
+                        </div>
+                    }
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Введите сообщение..." @bind="NewMessageText"/>
+                    <button class="btn btn-primary" @onclick="SendMessage">Отправить</button>
+                </div>
+            </div>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    public string ChatId { get; set; }
+
+    public List<MessageResponse>? Messages { get; set; }
+    private string? NewMessageText { get; set; }
+    private string? UserId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var id = user.FindFirst(c => c.Type == "userId")?.Value;
+        UserId = id;
+        
+        if (user.Identity.IsAuthenticated)
+        {
+            var responseChat = await Http.GetAsync($"https://localhost:7270/Api/Chat/GetUserChats?userId={id}");
+            var chats = await responseChat.Content.ReadFromJsonAsync<List<ChatResponse>>();
+            var responseMessage = await Http.GetAsync($"https://localhost:7270/Api/Chat/GetChatsMessages?chatId={chats[0].Id}");
+            Messages = await responseMessage.Content.ReadFromJsonAsync<List<MessageResponse>>();
+            // User is authenticated
+        }
+        else
+        {
+            // User is not authenticated, redirect to login page
+            NavigationManager.NavigateTo("login");
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (!string.IsNullOrEmpty(NewMessageText))
+        {
+            Messages.Add(new MessageResponse { Sender = "Вы", Text = NewMessageText });
+            var newMes = new AddMessageRequest { ChatId = @ChatId, SenderId = UserId, Text = NewMessageText };
+            NewMessageText = string.Empty;
+            var response = await Http.PostAsJsonAsync("https://localhost:7270/Api/Chat/AddChatMessage", newMes);
+        }
+    }
+}

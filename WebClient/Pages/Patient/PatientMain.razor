@@ -1,5 +1,11 @@
 ﻿@page "/patient-main"
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+@using Plotly.Blazor
+@using Plotly.Blazor.Traces
+@using Plotly.Blazor.Traces.ScatterLib
+@using WebClient.Models
+@using WebClient.Responses
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HttpClient Http
@@ -7,10 +13,37 @@
 
 <AuthorizeView>
     <Authorized>
+        @* <PlotlyChart @bind-Config="config" @bind-Layout="layout" @bind-Data="data" @ref="chart" /> *@
+        
+        @if (DiaryNotes == null || Recipes == null)
+        {
+            <p><em>Загрузка...</em></p>
+        }
+        else
+        {
+            <div class="cards-container d-flex flex-wrap">
+                @foreach (var recipe in Recipes)
+                {
+                    <div class="card mb-3" style="width: auto; margin-right: 15px;">
+                        <div class="card-body">
+                            <p class="card-text">@recipe.Text</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     </Authorized>
 </AuthorizeView>
 
 @code {
+    public List<RecipeResponse> Recipes { get; set; }
+    public List<DiaryNote> DiaryNotes { get; set; }
+    // PlotlyChart chart;
+    // Config config = new Config();
+    // Layout layout = new Layout();
+    // // Using of the interface IList is important for the event callback!
+    // IList<ITrace> data = new List<ITrace>();
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -18,7 +51,45 @@
 
         if (user.Identity.IsAuthenticated)
         {
-            // User is authenticated
+            var patientId = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+            var recipesResponse = await Http.GetAsync($"https://localhost:7270/Api/Patient/GetPatientRecipes?patientId={patientId}");
+            var diaryResponse = await Http.GetAsync($"https://localhost:7270/Api/Patient/GetDiary?patientId={patientId}");
+            Recipes = await recipesResponse.Content.ReadFromJsonAsync<List<RecipeResponse>>();
+            DiaryNotes = await diaryResponse.Content.ReadFromJsonAsync<List<DiaryNote>>();
+
+            // var dates = new List<object>();
+            // var syses = new List<object>();
+            // var dias = new List<object>();
+            // var pulses = new List<object>();
+            // foreach (var diaryNote in DiaryNotes)
+            // {
+            //     dates.Add(diaryNote.Date.ToShortDateString());
+            //     syses.Add(diaryNote.PressureSYS);
+            //     dias.Add(diaryNote.PressureDIA);
+            //     pulses.Add(diaryNote.Pulse);
+            // }
+
+            // data.Add(new Scatter
+            // {
+            //     Name = "SYS",
+            //     Mode = ModeFlag.Lines | ModeFlag.Markers,
+            //     X = dates,
+            //     Y = syses
+            // });
+            // data.Add(new Scatter
+            // {
+            //     Name = "DIA",
+            //     Mode = ModeFlag.Lines | ModeFlag.Markers,
+            //     X = dates,
+            //     Y = dias
+            // });
+            // data.Add(new Scatter
+            // {
+            //     Name = "Пульс",
+            //     Mode = ModeFlag.Lines | ModeFlag.Markers,
+            //     X = dates,
+            //     Y = pulses
+            // });
         }
         else
         {

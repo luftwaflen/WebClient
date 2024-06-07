@@ -6,8 +6,7 @@ public class User
 {
     public Guid Id { get; set; }
     public string Login { get; set; }
-    public string Password { get; set; }
     public UserRoles Role { get; set; }
-    public virtual Family? Family { get; set; }
+    public virtual Guid? FamilyId { get; set; }
     public virtual FamilyRole? FamilyRole { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using WebClient.Requests
 @using WebClient.Responses
@@ -8,26 +9,29 @@
 @inject HttpClient Http;
 
 
-<div>
-    <EditForm FormName="loginForm" Model="@LoginRequest" OnValidSubmit="@LoginUser">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <div>
-            <label for="login">Логин</label>
-            <InputText id="login" @bind-Value="@LoginRequest.Login" />
-            <ValidationMessage For="@(() => LoginRequest.Login)" />
-        </div>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="border p-4 rounded" style="width: 100%; max-width: 400px;">
+        <EditForm FormName="loginForm" Model="@LoginRequest" OnValidSubmit="@LoginUser">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-3">
+                <label for="login">Логин</label>
+                <InputText class="form-control" id="login" @bind-Value="@LoginRequest.Login" />
+                <ValidationMessage For="@(() => LoginRequest.Login)" />
+            </div>
 
-        <div>
-            <label for="password">Пароль</label>
-            <InputText id="password" type="password" @bind-Value="@LoginRequest.Password" />
-            <ValidationMessage For="@(() => LoginRequest.Password)" />
-        </div>
-        <div>
-            <button FormName="loginForm" type="submit">Вход</button>
-        </div>
-    </EditForm>
+            <div class="mb-3">
+                <label for="password">Пароль</label>
+                <InputText class="form-control" id="password" type="password" @bind-Value="@LoginRequest.Password" />
+                <ValidationMessage For="@(() => LoginRequest.Password)" />
+            </div>
+            <div>
+                <button class="btn btn-primary" FormName="loginForm" type="submit">Вход</button>
+            </div>
+        </EditForm>
+    </div>
 </div>
+
 
 @code {
     [SupplyParameterFromForm] public LoginRequest? LoginRequest { get; set; }
@@ -54,7 +58,29 @@
             // var identity = new ClaimsIdentity(jwtToken.Claims, "jwt");
             // var user = new ClaimsPrincipal(identity);
 
-            Navigation.NavigateTo(Navigation.Uri, true);
+            var role = User.User.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
+
+            switch (role)
+            {
+                case "Admin":
+                {
+                    Navigation.NavigateTo("/users", true);
+                }
+                    break;
+                case "Doctor":
+                {
+                    Navigation.NavigateTo("/doctor-patients", true);
+                }
+                    break;
+                case "Patient":
+                {
+                    Navigation.NavigateTo("/patient-main", true);
+                }
+                    break;
+                default:
+                    Navigation.NavigateTo(Navigation.Uri, true);
+                    break;
+            }
         }
         else
         {
@@ -62,5 +88,4 @@
             Console.WriteLine("Login failed");
         }
     }
-
 }

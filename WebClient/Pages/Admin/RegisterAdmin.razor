@@ -13,17 +13,17 @@
         <ValidationSummary/>
         <div>
             <label for="login1">Логин</label>
-            <InputText id="login1" @bind-Value="@AdminRegistration.Login"/>
+            <InputText class="form-control" id="login1" @bind-Value="@AdminRegistration.Login" />
             <ValidationMessage For="@(() => AdminRegistration.Login)"/>
         </div>
 
         <div>
             <label for="password1">Пароль</label>
-            <InputText id="password1" type="password" @bind-Value="@AdminRegistration.Password"/>
+            <InputText class="form-control" id="password1" type="password" @bind-Value="@AdminRegistration.Password" />
             <ValidationMessage For="@(() => AdminRegistration.Password)"/>
         </div>
         <div>
-            <button FormName="adminRegForm" type="submit">Регистрация</button>
+            <button class="btn btn-primary" FormName="adminRegForm" type="submit">Регистрация</button>
         </div>
     </EditForm>
 </div>

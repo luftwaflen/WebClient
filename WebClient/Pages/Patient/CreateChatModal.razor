@@ -1,10 +1,11 @@
 ﻿@using Blazored.Modal
 @using Blazored.Modal.Services
+@using WebClient.Responses
 
 <div>
     <EditForm Model="_form" OnValidSubmit="SubmitForm">
         <div>
-            <label for="name">Название семейной группы</label>
+            <label for="name">Название чата</label>
             <InputText class="form-control" @bind-Value="_form.Name" />
         </div>
 
@@ -16,11 +17,11 @@
 </div>
 
 @code {
-    private readonly WebClient.Models.Family _form = new();
+    private readonly ChatResponse _form = new();
 
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
-    protected override void OnInitialized() => BlazoredModal.SetTitle("Семейная группа");
+    protected override void OnInitialized() => BlazoredModal.SetTitle("Новый чат");
 
     private async Task SubmitForm() => await BlazoredModal.CloseAsync(ModalResult.Ok());
     private async Task Cancel() => await BlazoredModal.CancelAsync();

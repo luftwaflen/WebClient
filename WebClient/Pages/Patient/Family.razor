@@ -1,27 +1,67 @@
 ﻿@page "/family"
 @using Blazored.Modal.Services
 @using Microsoft.AspNetCore.Components.Authorization
+@using WebClient.Models
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HttpClient Http
-<h3>Family</h3>
 
 <AuthorizeView>
     <Authorized>
-        <button @onclick="ShowModal">Создать семейную группу</button>
+        @if (FamilyMembers == null)
+        {
+            <div class="d-flex justify-content-center my-3">
+                <button class="btn btn-primary" @onclick="ShowCreateModal">Создать семейную группу</button>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex justify-content-center">
+                <div class="card w-75 my-3">
+                    <div class="card-body">
+                        <table class="table mb-3">
+                            <thead>
+                            <tr>
+                                <th>Пользователь</th>
+                                <th>Роль</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var member in FamilyMembers)
+                            {
+                                <tr>
+                                    <td>@member.Login</td>
+                                    <td>@member.FamilyRole.Name</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-primary" @onclick="ShowAddModal">Добавить в семейную группу</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
     </Authorized>
 </AuthorizeView>
 
 @code {
-    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+    [CascadingParameter] public IModalService ModalCreate { get; set; } = default!;
+    [CascadingParameter] public IModalService ModalAdd { get; set; } = default!;
+    public List<User> FamilyMembers { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
+        var id = user.FindFirst(c => c.Type == "userId")?.Value;
 
         if (user.Identity.IsAuthenticated)
         {
+            var response = await Http.GetAsync($"https://localhost:7270/Api/User/GetFamily?userId={id}");
+            FamilyMembers = await response.Content.ReadFromJsonAsync<List<User>>();
             // User is authenticated
         }
         else
@@ -31,9 +71,20 @@
         }
     }
 
-    private async Task ShowModal()
+    private async Task ShowCreateModal()
     {
-        var messageForm = Modal.Show<CreateFamilyModal>("Создать семейную группу");
+        var messageForm = ModalCreate.Show<CreateFamilyModal>("Создать семейную группу");
+        var result = await messageForm.Result;
+
+        if (result.Confirmed)
+        {
+            var message = result.Data.ToString();
+        }
+    }
+
+    private async Task ShowAddModal()
+    {
+        var messageForm = ModalCreate.Show<AddToFamilyModal>("Добавить в семейную группу");
         var result = await messageForm.Result;
 
         if (result.Confirmed)

@@ -17,6 +17,8 @@
 </AuthorizeView>
 
 @code {
+    
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -24,7 +26,8 @@
 
         if (user.Identity.IsAuthenticated)
         {
-            // User is authenticated
+
+           
         }
         else
         {

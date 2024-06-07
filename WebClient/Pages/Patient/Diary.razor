@@ -7,42 +7,46 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HttpClient Http
-<h3>Diary</h3>
 
 <AuthorizeView>
     <Authorized>
-        <button @onclick="ShowModal">Создать запись</button>
-        <div>
-            @if (DiaryNotes == null)
-            {
-                <p><em>Загрузка...</em></p>
-            }
-            else
-            {
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Дата</th>
-                        <th>Систола</th>
-                        <th>Диастола</th>
-                        <th>Пульс</th>
-                        <th>Описание</th>
-                    </tr>
-                    </thead>
-                    <tbody>
+        <div class="d-flex flex-column align-items-center">
+            <button class="btn btn-primary mb-3" @onclick="ShowModal">Создать запись</button>
+    
+            <div>
+                @if (DiaryNotes == null)
+                {
+                    <p><em>Загрузка...</em></p>
+                }
+                else
+                {
                     @foreach (var diaryNote in DiaryNotes)
                     {
-                        <tr>
-                            <td>@diaryNote.Date</td>
-                            <td>@diaryNote.PressureSYS</td>
-                            <td>@diaryNote.PressureDIA</td>
-                            <td>@diaryNote.Pulse</td>
-                            <td>@diaryNote.Description</td>
-                        </tr>
+                        <div class="card w-70 mb-3">
+                            <div class="card-body">
+                                <table class="table table-bordered table-responsive">
+                                    <thead>
+                                    <tr>
+                                        <th>Дата</th>
+                                        <th>Давление</th>
+                                        <th>Пульс</th>
+                                        <th>Описание</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>@diaryNote.Date</td>
+                                        <td>@diaryNote.PressureSYS\@diaryNote.PressureDIA</td>
+                                        <td>@diaryNote.Pulse</td>
+                                        <td>@diaryNote.Description</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     }
-                    </tbody>
-                </table>
-            }
+                }
+            </div>
         </div>
     </Authorized>
 </AuthorizeView>

@@ -3,29 +3,32 @@
 @using WebClient.Models
 <div>
     <EditForm Model="_form" OnValidSubmit="SubmitForm">
+        <div class="input-group mb-3">
+
+        </div>
         <div>
             <label for="message">Систола</label>
-            <InputText @bind-Value="_form.PressureSYS"/>
+            <InputText class="form-control" @bind-Value="_form.PressureSYS"/>
         </div>
-        
+
         <div>
             <label for="message">Диастола</label>
-            <InputText @bind-Value="_form.PressureDIA"/>
+            <InputText class="form-control" @bind-Value="_form.PressureDIA"/>
         </div>
-        
+
         <div>
             <label for="message">Пульс</label>
-            <InputText @bind-Value="_form.Pulse"/>
+            <InputText class="form-control" @bind-Value="_form.Pulse"/>
         </div>
-        
+
         <div>
             <label for="message">Описание</label>
-            <InputTextArea @bind-Value="_form.Description"/>
+            <InputTextArea class="form-control" @bind-Value="_form.Description"/>
         </div>
-        
+
         <div>
-            <button type="submit">Создать</button>
-            <button @onclick="Cancel">Отмена</button>
+            <button class="btn btn-primary" type="submit">Создать</button>
+            <button class="btn btn-danger" @onclick="Cancel">Отмена</button>
         </div>
     </EditForm>
 </div>

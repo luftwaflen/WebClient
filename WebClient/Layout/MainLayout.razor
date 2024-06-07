@@ -33,7 +33,7 @@
                 @if (@context.User.IsInRole("Admin") || @context.User.IsInRole("Doctor") || @context.User.IsInRole("Patient"))
                 {
                     <div class="top-row px-4">
-                        <a href="" @onclick="@Logout">Logout</a>
+                        <a href="" @onclick="@Logout">Выход</a>
                     </div>
                 }
             </Authorized>

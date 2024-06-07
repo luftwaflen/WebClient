@@ -13,29 +13,29 @@
         <ValidationSummary />
         <div>
             <label for="login1">Логин</label>
-            <InputText id="login1" @bind-Value="@DoctorRegistration.Login" />
+            <InputText class="form-control" id="login1" @bind-Value="@DoctorRegistration.Login" />
             <ValidationMessage For="@(() => DoctorRegistration.Login)" />
         </div>
                 
         <div>
             <label for="firstName1">Имя</label>
-            <InputText id="firstName1" @bind-Value="@DoctorRegistration.FirstName" />
+            <InputText class="form-control" id="firstName1" @bind-Value="@DoctorRegistration.FirstName" />
             <ValidationMessage For="@(() => DoctorRegistration.FirstName)" />
         </div>
         
         <div>
             <label for="secondName1">Фамилия</label>
-            <InputText id="secondName1" @bind-Value="@DoctorRegistration.SecondName" />
+            <InputText class="form-control" id="secondName1" @bind-Value="@DoctorRegistration.SecondName" />
             <ValidationMessage For="@(() => DoctorRegistration.SecondName)" />
         </div>
 
         <div>
             <label for="password1">Пароль</label>
-            <InputText id="password1" type="password" @bind-Value="@DoctorRegistration.Password" />
+            <InputText class="form-control" id="password1" type="password" @bind-Value="@DoctorRegistration.Password" />
             <ValidationMessage For="@(() => DoctorRegistration.Password)" />
         </div>
         <div>
-            <button FormName="doctorRegForm" type="submit">Регистрация</button>
+            <button class="btn btn-primary" FormName="doctorRegForm" type="submit">Регистрация</button>
         </div>
     </EditForm>
 </div>

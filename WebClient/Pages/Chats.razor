@@ -1,5 +1,75 @@
 ﻿@page "/chats"
+@using System.Security.Claims
+@using Blazored.Modal.Services
+@using WebClient.Responses
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebClient.Models
+@using WebClient.Pages.Patient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+
+<AuthorizeView>
+    <Authorized>
+        <div class="d-inline-flex flex-column align-items-center">
+            @if (UserChats == null)
+            {
+                <button class="btn btn-primary mb-3" @onclick="ShowModal">Новый чат</button>
+            }
+            else
+            {
+                <button class="btn btn-primary mb-3" @onclick="ShowModal">Новый чат</button>
+                @foreach (var chat in UserChats)
+                {
+                    <div class="card mb-3" style="width: 300px; margin: 10px;">
+                        <h5 class="card-header">@chat.Name</h5>
+                        <div class="card-body text-center">
+                            <a @onclick="() => OpenChat(chat.Id.ToString())" class="btn btn-primary">Открыть чат</a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </Authorized>
+</AuthorizeView>
 
 @code {
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+    public List<ChatResponse> UserChats { get; set; }
+    public List<User> Users { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var id = user.FindFirst(c => c.Type == "userId")?.Value;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var response = await Http.GetAsync($"https://localhost:7270/Api/Chat/GetUserChats?userId={id}");
+            UserChats = await response.Content.ReadFromJsonAsync<List<ChatResponse>>();
+            // User is authenticated
+        }
+        else
+        {
+            // User is not authenticated, redirect to login page
+            NavigationManager.NavigateTo("login");
+        }
+    }
+
+private async Task OpenChat(string chatId)
+{
+    NavigationManager.NavigateTo($"/chat");
+}
+
+    private async Task ShowModal()
+    {
+        var messageForm = Modal.Show<CreateChatModal>("Новый чат");
+        var result = await messageForm.Result;
+
+        if (result.Confirmed)
+        {
+            var message = result.Data.ToString();
+        }
+    }
 }

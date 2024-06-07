@@ -1,26 +1,30 @@
 ﻿@using Blazored.Modal
 @using Blazored.Modal.Services
+@using WebClient.Requests
 
 <div>
     <EditForm Model="_form" OnValidSubmit="SubmitForm">
         <div>
-            <label for="name">Название семейной группы</label>
-            <InputText class="form-control" @bind-Value="_form.Name" />
+            <label for="name">Логин добавляемого пользователя</label>
+            <InputText class="form-control" @bind-Value="_form.Login" />
         </div>
 
         <div>
-            <button class="btn btn-primary" type="submit">Создать</button>
+            <button class="btn btn-primary" type="submit">Добавить</button>
             <button class="btn btn-danger" @onclick="Cancel">Отмена</button>
         </div>
     </EditForm>
 </div>
 
 @code {
-    private readonly WebClient.Models.Family _form = new();
+    private readonly AddToFamilyRequest _form = new();
 
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
-    protected override void OnInitialized() => BlazoredModal.SetTitle("Семейная группа");
+    protected override void OnInitialized()
+    {
+        BlazoredModal.SetTitle("Добавить в семью");
+    }
 
     private async Task SubmitForm() => await BlazoredModal.CloseAsync(ModalResult.Ok());
     private async Task Cancel() => await BlazoredModal.CancelAsync();

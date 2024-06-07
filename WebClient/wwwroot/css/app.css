@@ -2,6 +2,20 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+.cards-container .card-body {
+    overflow-x: auto;
+}
+
+.cards-container .table {
+    width: auto;
+    max-width: 100%;
+}
+
+.chat-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
 h1:focus {
     outline: none;
 }
